@@ -1,7 +1,7 @@
 FROM jupyter/minimal-notebook:hub-4.0.2 as base
 
 USER root
-RUN apt-get update && apt-get -y dist-upgrade && apt-get install -y fakeroot dumb-init vim build-essential tmux curl less htop btop nano patch openssh-server && apt-get clean && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get -y dist-upgrade && apt-get install -y fakeroot dumb-init vim build-essential graphviz tmux curl less htop btop nano patch openssh-server && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Install LazyGit
 RUN LAZYGIT_VERSION=$(curl -s "https://api.github.com/repos/jesseduffield/lazygit/releases/latest" | \
