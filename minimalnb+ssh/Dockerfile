@@ -1,7 +1,70 @@
 FROM jupyter/minimal-notebook:hub-4.0.2 as base
 
 USER root
-RUN apt-get update && apt-get -y dist-upgrade && apt-get install -y fakeroot dumb-init vim build-essential graphviz tmux curl less htop btop nano patch openssh-server && apt-get clean && rm -rf /var/lib/apt/lists/*
+
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    software-properties-common \
+    ca-certificates \
+    gnupg && \
+    add-apt-repository --yes ppa:ultradvorka/ppa && \
+    apt-get update && \
+    apt-get -y dist-upgrade && \
+    apt-get install -y --no-install-recommends \
+    fakeroot \
+    dumb-init \
+    vim \
+    build-essential \
+    graphviz \
+    tmux \
+    curl \
+    less \
+    htop \
+    hstr \
+    btop \
+    nano \
+    patch \
+    openssh-server \
+    fonts-dejavu \
+    unixodbc \
+    unixodbc-dev \
+    r-cran-rodbc \
+    gfortran \
+    gcc && \
+    # Clean up APT caches
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
+
+# R packages including IRKernel which gets installed globally.
+# r-e1071: dependency of the caret R package
+RUN mamba install --yes \
+    'r-base' \
+    'r-caret' \
+    'r-crayon' \
+    'r-devtools' \
+    'r-e1071' \
+    'r-forecast' \
+    'r-hexbin' \
+    'r-htmltools' \
+    'r-htmlwidgets' \
+    'r-irkernel' \
+    'r-nycflights13' \
+    'r-randomforest' \
+    'r-rcurl' \
+    'r-glue' \
+    'r-rmarkdown' \
+    'r-reticulate' \
+    'r-rodbc' \
+    'r-rsqlite' \
+    'r-shiny' \
+    'r-tidymodels' \
+    'r-tidyverse' \
+    'unixodbc' && \
+    mamba clean --all -f -y && \
+    fix-permissions "${CONDA_DIR}" && \
+    fix-permissions "/home/${NB_USER}"
+
 
 # Install LazyGit
 RUN LAZYGIT_VERSION=$(curl -s "https://api.github.com/repos/jesseduffield/lazygit/releases/latest" | \
