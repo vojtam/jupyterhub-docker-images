@@ -36,6 +36,17 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/*
 
 
+#### Install uv ####
+# Download the latest uv installer
+ADD https://astral.sh/uv/install.sh /uv-installer.sh
+
+# Run the installer then remove it
+RUN sh /uv-installer.sh && rm /uv-installer.sh
+
+# Ensure the installed binary is on the `PATH`
+ENV PATH="/root/.local/bin/:$PATH"
+#### Install uv end ####
+
 # R packages including IRKernel which gets installed globally.
 # r-e1071: dependency of the caret R package
 RUN mamba install --yes \
