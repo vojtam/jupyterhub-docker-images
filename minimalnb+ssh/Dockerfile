@@ -24,6 +24,7 @@ RUN apt-get update && \
     btop \
     nano \
     patch \
+    neovim \
     openssh-server \
     fonts-dejavu \
     unixodbc \
@@ -35,6 +36,20 @@ RUN apt-get update && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
+#### Install Rust (for vLLM) #### 
+RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y && \
+    rm -rf /root/.cargo/registry/cache && \
+    rm -rf /root/.cargo/git/db
+
+RUN curl -sS https://starship.rs/install.sh | sh -s -- --yes
+
+#### Install zellij ####
+RUN cargo install --locked zellij
+
+
+# Ensure Rust is available in PATH
+ENV PATH="/root/.cargo/bin:$PATH"
+#### Install Rust end ####
 
 #### Install uv ####
 # Download the latest uv installer
@@ -140,6 +155,9 @@ ENV PATH=$PATH:/opt/conda/bin
 ENV LD_LIBRARY_PATH=/opt/conda/lib
 
 WORKDIR /home/jovyan
+
+# Install Starship prompt   
+RUN echo eval "$(starship init bash)" >> ~/.bashrc
 
 # Required for GPU
 RUN mkdir -p /usr/share/glvnd/egl_vendor.d /usr/share/egl/egl_external_platform.d /etc/vulkan/icd.d /etc/vulkan/implicit_layer.d
