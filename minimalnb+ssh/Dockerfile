@@ -1,5 +1,4 @@
-FROM jupyter/minimal-notebook:hub-4.0.2 as base
-
+FROM quay.io/jupyter/pytorch-notebook:cuda12-hub-5.3.0 as base
 USER root
 
 RUN apt-get update && \
@@ -42,9 +41,6 @@ RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y && \
     rm -rf /root/.cargo/git/db
 
 RUN curl -sS https://starship.rs/install.sh | sh -s -- --yes
-
-#### Install zellij ####
-RUN cargo install --locked zellij
 
 
 # Ensure Rust is available in PATH
@@ -123,29 +119,17 @@ COPY --chown=1000:100 sshd.conf /etc/ssh/sshd_config.d/sshd.conf
 COPY --chown=1000:100 start-notebook.sh /usr/local/bin/start-notebook.sh
 
 RUN conda install --quiet --yes nb_conda_kernels
+RUN conda install --quiet --yes -c conda-forge cudatoolkit-dev
 
 # Create new image from scratch
-FROM scratch
+# FROM scratch
 
-#RUN curl 
 
-# kaniko runner compatible, for docker, it is sufficent to replace all 
-# the copy commands by single one: COPY --chown=1000:100 --from=base / / 
-COPY --chown=1000:100 --from=base  /bin /bin
-COPY --chown=1000:100 --from=base  /sbin /sbin
-COPY --chown=1000:100 --from=base  /lib64 /lib64
-COPY --chown=1000:100 --from=base  /libx32 /libx32
-COPY --chown=1000:100 --from=base  /lib /lib
-COPY --chown=1000:100 --from=base  /boot /boot
-COPY --chown=1000:100 --from=base  /etc /etc
-COPY --chown=1000:100 --from=base  /home /home
-COPY --chown=1000:100 --from=base  /opt /opt
-COPY --chown=1000:100 --from=base  /root /root
-COPY --chown=1000:100 --from=base  /tmp /tmp
-COPY --chown=1000:100 --from=base  /usr /usr
-COPY --chown=1000:100 --from=base  /var /var
+# COPY --chown=1000:100 --from=base / / 
 
-USER 1000
+# COPY --from=base /usr/local/cuda /usr/local/cuda
+
+
 
 ENV LANG en_US.UTF-8
 ENV LANGUAGE en_US:en
@@ -161,6 +145,7 @@ RUN echo eval "$(starship init bash)" >> ~/.bashrc
 
 # Required for GPU
 RUN mkdir -p /usr/share/glvnd/egl_vendor.d /usr/share/egl/egl_external_platform.d /etc/vulkan/icd.d /etc/vulkan/implicit_layer.d
+USER 1000
 
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 ENV XDG_CACHE_HOME="/home/${NB_USER}/.cache/"
